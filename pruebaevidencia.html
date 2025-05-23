@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Evidencias</title>
+<style>
+  body {
+    background: #f4f7f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #0078d7;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    user-select: none;
+  }
+  .camera-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  #cameraButton {
+    background: #0078d7;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,120,215,0.4);
+    transition: background-color 0.3s ease;
+  }
+  #cameraButton:hover:not(:disabled) {
+    background: #005ea2;
+  }
+  #cameraButton:disabled {
+    cursor: not-allowed;
+    background: #999;
+  }
+  /* Camera SVG icon */
+  #cameraButton svg {
+    fill: white;
+    width: 40px;
+    height: 40px;
+    user-select: none;
+  }
+  #videoStream {
+    margin-top: 15px;
+    border-radius: 10px;
+    max-width: 320px;
+    max-height: 240px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    display: none;
+    user-select: none;
+  }
+  #photoPreview {
+    margin-top: 15px;
+    max-width: 320px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    display: none;
+    user-select: none;
+  }
+  #controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+  }
+  button.controlBtn {
+    background: #0078d7;
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,120,215,0.5);
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  button.controlBtn:disabled {
+    background: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  /* Section for info and todo */
+  .info-todo-container {
+    display: flex;
+    gap: 25px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .info-section, .todo-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgb(0 0 0 / 0.1);
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    min-width: 280px;
+  }
+  .info-section h2, .todo-section h2 {
+    color: #0078d7;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+  }
+  #realtimeInfo {
+    flex-grow: 1;
+    min-height: 130px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1.8px solid #ddd;
+    background: #f9f9f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1rem;
+    color: #222;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    user-select: text;
+  }
+  #mapContainer {
+    margin-top: 10px;
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    display: none;
+  }
+  #mapIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .todo-section input, .todo-section textarea {
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #ddd;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 12px;
+  }
+  .todo-section input:focus, .todo-section textarea:focus {
+    border-color: #0078d7;
+    outline: none;
+  }
+  #guardarEvidenceWrapper {
+    text-align: center;
+  }
+  #guardarEvidenceBtn {
+    background: #0078d7;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 12px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,120,215,0.6);
+    user-select: none;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  #guardarEvidenceBtn:hover:not(:disabled) {
+    background: #005ea2;
+  }
+  #guardarEvidenceBtn:disabled {
+    background: #777;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .saved-photo-container {
+    margin-top: 20px;
+    width: 320px;
+    max-width: 90vw;
+    border-radius: 10px;
+    background: white;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+  }
+  .saved-photo-container h3 {
+    color: #0078d7;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .saved-photo-container img {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto 10px;
+  }
+  .evidences-list {
+    margin-top: 30px;
+    max-width: 900px;
+    width: 100%;
+  }
+  .evidence-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 6px 14px rgb(0 0 0 / 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  .evidence-item img {
+    max-width: 140px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .evidence-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+  }
+  .evidence-details p {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .evidence-location {
+    font-size: 0.9rem;
+    color: #0078d7;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<h1>EVIDENCIAS</h1>
+
+<div class="camera-container" aria-label="Control de cámara">
+  <button id="cameraButton" title="Abrir cámara para tomar foto" aria-label="Abrir cámara">
+    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+      <path d="M20 5h-3.17l-1.83-2H8L6.17 5H3c-1.1 0-2 .9-2 2v12a2 2 0 0 0 2 2h17c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+      <circle cx="12" cy="12" r="2.5"/>
+    </svg>
+  </button>
+  <video id="videoStream" autoplay playsinline aria-label="Vista previa cámara"></video>
+  <canvas id="photoPreview" aria-label="Foto tomada"></canvas>
+  <div id="controls">
+    <button id="takePhotoBtn" class="controlBtn" disabled>Tomar Foto</button>
+    <button id="savePhotoBtn" class="controlBtn" disabled style="background:#999; cursor:not-allowed;">Guardar Foto</button>
+    <button id="closeCamBtn" class="controlBtn" disabled>Cerrar Cámara</button>
+  </div>
+</div>
+
+<div class="saved-photo-container" id="savedPhotoContainer" style="display:none;" aria-live="polite" aria-label="Foto tomada preview">
+  <h3>Foto tomada</h3>
+  <img id="savedPhoto" alt="Foto tomada" />
+</div>
+
+<div class="info-todo-container">
+  <section class="info-section" aria-label="Información en tiempo real de ubicación">
+    <h2>Información en tiempo real (Ubicación GPS)</h2>
+    <div id="realtimeInfo" aria-live="polite" aria-label="Datos de ubicación y geolocalización">
+      Obteniendo ubicación...
+    </div>
+    <div id="mapContainer" aria-hidden="true">
+      <iframe id="mapIframe" src="" title="Mapa de ubicación GPS" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </section>
+  <section class="todo-section" aria-label="Sección Definir toso">
+    <h2>Definir toso</h2>
+    <input type="text" id="todoInput" placeholder="Escriba una tarea o información..." aria-label="Definir toso" />
+    <textarea id="todoDetails" placeholder="Detalles adicionales..." rows="4" aria-label="Detalles del toso"></textarea>
+    <div id="guardarEvidenceWrapper">
+      <button id="guardarEvidenceBtn" disabled aria-disabled="true" aria-label="Guardar evidencia completa">Guardar Evidencia</button>
+    </div>
+  </section>
+</div>
+
+<div class="evidences-list" id="evidencesList" aria-live="polite" aria-label="Lista de evidencias guardadas">
+  <h2 style="color:#0078d7; margin-bottom:15px;">Evidencias Guardadas</h2>
+  <!-- Saved evidence items will appear here -->
+</div>
+
+<script>
+  const cameraButton = document.getElementById('cameraButton');
+  const videoStream = document.getElementById('videoStream');
+  const photoPreview = document.getElementById('photoPreview');
+  const takePhotoBtn = document.getElementById('takePhotoBtn');
+  const savePhotoBtn = document.getElementById('savePhotoBtn');
+  const closeCamBtn = document.getElementById('closeCamBtn');
+
+  const savedPhotoContainer = document.getElementById('savedPhotoContainer');
+  const savedPhoto = document.getElementById('savedPhoto');
+
+  const realtimeInfo = document.getElementById('realtimeInfo');
+  const mapContainer = document.getElementById('mapContainer');
+  const mapIframe = document.getElementById('mapIframe');
+
+  const todoInput = document.getElementById('todoInput');
+  const todoDetails = document.getElementById('todoDetails');
+  const guardarEvidenceBtn = document.getElementById('guardarEvidenceBtn');
+
+  const evidencesList = document.getElementById('evidencesList');
+
+  let stream = null;
+  let photoDataUrl = null;
+  let currentLocation = null;
+  let watchId = null;
+
+  // Open camera and stream
+  cameraButton.addEventListener('click', async () => {
+    guardarEvidenceBtn.disabled = true;
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        videoStream.srcObject = stream;
+        videoStream.style.display = 'block';
+
+        photoPreview.style.display = 'none';
+        takePhotoBtn.disabled = false;
+        savePhotoBtn.disabled = true;
+        closeCamBtn.disabled = false;
+
+        cameraButton.disabled = true;
+        savedPhotoContainer.style.display = 'none';
+
+      } catch (error) {
+        alert('No se pudo acceder a la cámara: ' + error.message);
+      }
+    } else {
+      alert('El navegador no soporta acceso a la cámara.');
+    }
+  });
+
+  // Take photo from video stream to canvas
+  takePhotoBtn.addEventListener('click', () => {
+    if (!stream) {
+      alert('La cámara no está activa.');
+      return;
+    }
+    const width = videoStream.videoWidth;
+    const height = videoStream.videoHeight;
+    photoPreview.width = width;
+    photoPreview.height = height;
+    const ctx = photoPreview.getContext('2d');
+    ctx.drawImage(videoStream, 0, 0, width, height);
+    photoPreview.style.display = 'block';
+
+    photoDataUrl = photoPreview.toDataURL('image/png');
+
+    savedPhoto.src = photoDataUrl;
+    savedPhotoContainer.style.display = 'flex';
+
+    actualizarGuardarEvidenciaBtn();
+
+    savePhotoBtn.disabled = true; // disable old unused photo save button
+  });
+
+  // Disabled photo save button (older UI)
+  savePhotoBtn.disabled = true;
+
+  // Close camera stream
+  closeCamBtn.addEventListener('click', () => {
+    stopCamera();
+    resetControls();
+  });
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    videoStream.style.display = 'none';
+    photoPreview.style.display = 'none';
+    takePhotoBtn.disabled = true;
+    closeCamBtn.disabled = true;
+  }
+
+  function resetControls() {
+    cameraButton.disabled = false;
+    guardarEvidenceBtn.disabled = !(photoDataUrl && currentLocation);
+  }
+
+  // Start watchPosition to update location in realtime
+  function startLocationWatch() {
+    if (!navigator.geolocation) {
+      realtimeInfo.textContent = 'Geolocalización no soportada por este navegador.';
+      mapContainer.style.display = 'none';
+      currentLocation = null;
+      actualizarGuardarEvidenciaBtn();
+      return;
+    }
+    realtimeInfo.textContent = 'Obteniendo ubicación...';
+
+    const options = {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000
+    };
+
+    watchId = navigator.geolocation.watchPosition(success => {
+      const lat = success.coords.latitude.toFixed(6);
+      const lon = success.coords.longitude.toFixed(6);
+      currentLocation = { latitude: lat, longitude: lon };
+
+      const timestamp = new Date(success.timestamp).toLocaleTimeString();
+      const acc = success.coords.accuracy ? `±${success.coords.accuracy}m` : '';
+      const alt = success.coords.altitude !== null ? `Altitud: ${success.coords.altitude.toFixed(1)}m` : '';
+      const speed = success.coords.speed !== null ? `Velocidad: ${success.coords.speed.toFixed(1)} m/s` : '';
+
+      realtimeInfo.textContent =
+        `Latitud: ${lat}\n` +
+        `Longitud: ${lon}\n` +
+        (alt ? alt + '\n' : '') +
+        (speed ? speed + '\n' : '') +
+        `Exactitud: ${acc}\n` +
+        `Hora: ${timestamp}`;
+
+      // Show google map iframe for coords
+      if (lat && lon) {
+        mapContainer.style.display = 'block';
+        const mapsUrl = `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+        if (mapIframe.src !== mapsUrl) {
+          mapIframe.src = mapsUrl;
+        }
+      } else {
+        mapContainer.style.display = 'none';
+        mapIframe.src = '';
+      }
+
+      actualizarGuardarEvidenciaBtn();
+    }, error => {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          realtimeInfo.textContent = "Permiso denegado para acceder a la ubicación.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          realtimeInfo.textContent = "Información de ubicación no disponible.";
+          break;
+        case error.TIMEOUT:
+          realtimeInfo.textContent = "Tiempo de espera agotado para obtener la ubicación.";
+          break;
+        default:
+          realtimeInfo.textContent = "Error desconocido al obtener la ubicación.";
+      }
+      mapContainer.style.display = 'none';
+      mapIframe.src = '';
+      currentLocation = null;
+      actualizarGuardarEvidenciaBtn();
+    }, options);
+  }
+
+  // Enable or disable the guardar evidencia button
+  function actualizarGuardarEvidenciaBtn() {
+    guardarEvidenceBtn.disabled = !(photoDataUrl && currentLocation);
+  }
+
+  // Save evidence (photo+location+description)
+  guardarEvidenceBtn.addEventListener('click', () => {
+    if (!photoDataUrl) {
+      alert('Por favor, tome una foto primero.');
+      return;
+    }
+    if (!currentLocation) {
+      alert('Por favor, permita y espere a que se obtenga la ubicación.');
+      return;
+    }
+
+    const todoText = todoInput.value.trim();
+    const todoDetailsText = todoDetails.value.trim();
+    const infoText = realtimeInfo.textContent || '';
+
+    const evidenceEntry = {
+      photo: photoDataUrl,
+      location: currentLocation,
+      info: infoText,
+      todo: todoText,
+      todoDetails: todoDetailsText,
+      timestamp: new Date().toISOString()
+    };
+
+    // Load existing evidences from localStorage
+    let evidences = [];
+    try {
+      const saved = localStorage.getItem('evidences');
+      if (saved) evidences = JSON.parse(saved);
+    } catch (e) {
+      console.warn('LocalStorage read error', e);
+    }
+
+    evidences.push(evidenceEntry);
+
+    // Save updated evidences
+    try {
+      localStorage.setItem('evidences', JSON.stringify(evidences));
+      alert('Evidencia guardada correctamente.');
+      resetAll();
+      renderEvidences();
+    } catch (e) {
+      alert('Error al guardar la evidencia: ' + e.message);
+    }
+  });
+
+  // Reset UI after save
+  function resetAll() {
+    stopCamera();
+    resetControls();
+    photoDataUrl = null;
+    currentLocation = null;
+
+    realtimeInfo.textContent = 'Obteniendo ubicación...';
+    mapContainer.style.display = 'none';
+    mapIframe.src = '';
+
+    todoInput.value = '';
+    todoDetails.value = '';
+  }
+
+  // Render saved evidences on page load and after saving
+  function renderEvidences() {
+    let evidences = [];
+    try {
+      const saved = localStorage.getItem('evidences');
+      if (saved) evidences = JSON.parse(saved);
+    } catch (e) {
+      console.warn('LocalStorage parsing error', e);
+    }
+
+    evidencesList.innerHTML = '<h2 style="color:#0078d7; margin-bottom:15px;">Evidencias Guardadas</h2>';
+
+    if (evidences.length === 0) {
+      evidencesList.insertAdjacentHTML('beforeend', '<p>No hay evidencias guardadas todavía.</p>');
+      return;
+    }
+
+    evidences.forEach(ev => {
+      const div = document.createElement('div');
+      div.className = 'evidence-item';
+
+      div.innerHTML = `
+        <img src="${ev.photo}" alt="Foto de evidencia" />
+        <div class="evidence-details">
+          <p><strong>Información GPS:</strong><br>${escapeHTML(ev.info || 'Sin datos')}</p>
+          <p><strong>Definir toso:</strong> ${escapeHTML(ev.todo || 'No definido')}</p>
+          <p><strong>Detalles:</strong> ${escapeHTML(ev.todoDetails || 'Sin detalles')}</p>
+          ${ev.location ? `<p class="evidence-location">Ubicación: Lat ${ev.location.latitude}, Lon ${ev.location.longitude}</p>` : '<p class="evidence-location">Ubicación: No disponible</p>'}
+          <p><small><em>Guardado el: ${new Date(ev.timestamp).toLocaleString()}</em></small></p>
+        </div>
+      `;
+      evidencesList.appendChild(div);
+    });
+  }
+
+  // Escape HTML function for safe display
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, function(m) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[m];
+    });
+  }
+
+  // Initialize on page load
+  window.addEventListener('load', () => {
+    startLocationWatch();
+    renderEvidences();
+  });
+
+  // Clean up geolocation watch on unload
+  window.addEventListener('beforeunload', () => {
+    if (watchId != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+  });
+</script>
+
+</body>
+</html>
+

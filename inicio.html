@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Página Principal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: url('img/fondo.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .container {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 40px;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 180px);
+    grid-gap: 30px;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 0.7);
+  }
+
+  button {
+    background-color: blue;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 18px 0;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(255,111,97,0.5);
+    transition: 
+      background-color 0.3s ease, 
+      transform 0.3s ease, 
+      box-shadow 0.3s ease;
+  }
+
+  button:hover,
+  button:focus {
+    background-color: skyblue;
+    outline: none;
+    transform: scale(1.1) rotate(-3deg);
+    box-shadow: 0 12px 24px blue;
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Menú principal con botones">
+    <button onclick="location.href='catalago.html'">Catálogo</button>
+    <button onclick="location.href='integrantes.html'">Integrantes</button>
+    <button onclick="location.href='evidencia.html'">Evidencia</button>
+    <button onclick="location.href='actividades.html'">Actividad</button>
+    <button onclick="location.href='block.html'">Notas</button>
+    <button onclick="location.href='login.html'">Cerrar Sesión</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Página de Evidencias</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0;
+    padding: 20px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 900;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+
+  .container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .camera-section, .info-section {
+    background: rgba(0,0,0,0.35);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .camera-section {
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  video {
+    width: 100%;
+    max-width: 380px;
+    border-radius: 12px;
+    background: black;
+  }
+
+  canvas {
+    display: none;
+  }
+
+  .camera-buttons {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    background-color: #48c774;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(72,199,116,0.7);
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background-color: #36ab54;
+  }
+
+  .btn-cancel {
+    background-color: #d9534f;
+  }
+  .btn-cancel:hover:not(:disabled) {
+    background-color: #b02a27;
+  }
+
+  .btn-gps {
+    background-color: #f0ad4e;
+  }
+  .btn-gps:hover:not(:disabled) {
+    background-color: #d68b24;
+  }
+
+  .info-section {
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  textarea {
+    width: 90%;
+    min-height: 120px;
+    resize: vertical;
+    font-size: 1.1rem;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+  }
+
+  .location-display {
+    background: rgba(255 255 255 / 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 1rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dcdcdc;
+    user-select: none;
+  }
+
+  .location-display a {
+    color: #ffd966;
+    text-decoration: underline;
+  }
+  .location-display a:hover,
+  .location-display a:focus {
+    color: #ffffaa;
+    outline: none;
+  }
+
+  .evidence-list {
+    max-width: 900px;
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .evidence-item {
+    background: rgba(0 0 0 / 0.35);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .evidence-item img {
+    width: 150px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+
+  .evidence-text {
+    flex: 1 1 300px;
+    color: #eee;
+  }
+
+  @media (max-width: 780px) {
+    .container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .camera-section, .info-section {
+      flex: 1 1 100%;
+      max-width: 400px;
+    }
+    .evidence-item {
+      flex-direction: column;
+      align-items: center;
+    }
+    .evidence-text {
+      flex: none;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <h1>Página de Evidencias</h1>
+  <div class="container">
+    <section class="camera-section" aria-label="Sección de cámara">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
+      <div class="camera-buttons">
+        <button id="switch-camera-btn" title="Cambiar cámara">Cambiar cámara</button>
+        <button id="capture-btn" title="Tomar foto">Tomar foto</button>
+        <button id="cancel-btn" class="btn-cancel" title="Cancelar foto" disabled>Cancelar</button>
+      </div>
+    </section>
+    <section class="info-section" aria-label="Sección de información de evidencia">
+      <label for="definition">Definición de la imagen:</label>
+      <textarea id="definition" placeholder="Escribe la definición de la imagen aquí..."></textarea>
+      <button id="gps-btn" class="btn-gps" title="Obtener ubicación">Obtener ubicación</button>
+      <div id="location-display" class="location-display" aria-live="polite" aria-atomic="true">Ubicación no establecida</div>
+      <button id="save-btn" disabled>Guardar evidencia</button>
+    </section>
+  </div>
+
+  <div class="evidence-list" id="evidence-list" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+  (function() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const switchCameraBtn = document.getElementById('switch-camera-btn');
+    const definitionInput = document.getElementById('definition');
+    const gpsBtn = document.getElementById('gps-btn');
+    const locationDisplay = document.getElementById('location-display');
+    const saveBtn = document.getElementById('save-btn');
+    const evidenceList = document.getElementById('evidence-list');
+
+    let useFrontCamera = false;
+    let currentStream = null;
+    let capturedImage = null;
+    let currentLocation = null;
+
+    async function startCamera() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      const constraints = {
+        video: {
+          facingMode: useFrontCamera ? 'user' : 'environment'
+        },
+        audio: false
+      };
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        video.style.display = 'block';
+        canvas.style.display = 'none';
+        cancelBtn.disabled = true;
+        captureBtn.disabled = false;
+        switchCameraBtn.disabled = false;
+      } catch (err) {
+        alert('No se pudo acceder a la cámara: ' + err.message);
+      }
+    }
+
+    switchCameraBtn.addEventListener('click', () => {
+      useFrontCamera = !useFrontCamera;
+      startCamera();
+    });
+
+    captureBtn.addEventListener('click', () => {
+      if (!video.videoWidth || !video.videoHeight) {
+        alert('La cámara aún no está lista, intenta nuevamente.');
+        return;
+      }
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      capturedImage = canvas.toDataURL('image/png');
+
+      // Show preview by pausing video and hiding it
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+      cancelBtn.disabled = false;
+      captureBtn.disabled = true;
+      switchCameraBtn.disabled = true;
+      updateSaveButtonState();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      capturedImage = null;
+      canvas.style.display = 'none';
+      video.style.display = 'block';
+      cancelBtn.disabled = true;
+      captureBtn.disabled = false;
+      switchCameraBtn.disabled = false;
+      updateSaveButtonState();
+    });
+
+    gpsBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('La geolocalización no está soportada por este navegador.');
+        return;
+      }
+      gpsBtn.disabled = true;
+      locationDisplay.textContent = 'Obteniendo ubicación...';
+      navigator.geolocation.getCurrentPosition(position => {
+        currentLocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        const lat = currentLocation.latitude.toFixed(5);
+        const lon = currentLocation.longitude.toFixed(5);
+        const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+        locationDisplay.innerHTML = `Ubicación: <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer">Lat ${lat}, Lon ${lon}</a>`;
+        gpsBtn.disabled = false;
+        updateSaveButtonState();
+      }, err => {
+        alert('No se pudo obtener la ubicación: ' + err.message);
+        locationDisplay.textContent = 'Ubicación no establecida';
+        currentLocation = null;
+        gpsBtn.disabled = false;
+        updateSaveButtonState();
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    });
+
+    definitionInput.addEventListener('input', updateSaveButtonState);
+
+    saveBtn.addEventListener('click', () => {
+      if (!capturedImage || !definitionInput.value.trim() || !currentLocation) {
+        alert('Por favor, complete todos los campos y tome la foto para guardar.');
+        return;
+      }
+      // Create evidence card
+      const evidenceItem = document.createElement('article');
+      evidenceItem.className = 'evidence-item';
+
+      const imgElem = document.createElement('img');
+      imgElem.src = capturedImage;
+      imgElem.alt = 'Foto de evidencia';
+      evidenceItem.appendChild(imgElem);
+
+      const textContainer = document.createElement('div');
+      textContainer.className = 'evidence-text';
+
+      const defP = document.createElement('p');
+      defP.innerHTML = `<strong>Definición:</strong> ${definitionInput.value.trim()}`;
+      textContainer.appendChild(defP);
+
+      const locP = document.createElement('p');
+      locP.className = 'location-display';
+      const lat = currentLocation.latitude.toFixed(5);
+      const lon = currentLocation.longitude.toFixed(5);
+      const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      locP.innerHTML = `<strong>Ubicación:</strong> <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer">Lat ${lat}, Lon ${lon}</a>`;
+      textContainer.appendChild(locP);
+
+      evidenceItem.appendChild(textContainer);
+      evidenceList.prepend(evidenceItem);
+
+      // Reset inputs
+      definitionInput.value = '';
+      currentLocation = null;
+      locationDisplay.textContent = 'Ubicación no establecida';
+      capturedImage = null;
+      canvas.style.display = 'none';
+      video.style.display = 'block';
+      cancelBtn.disabled = true;
+      captureBtn.disabled = false;
+      switchCameraBtn.disabled = false;
+      saveBtn.disabled = true;
+
+      alert('Evidencia guardada exitosamente.');
+    });
+
+    function updateSaveButtonState() {
+      saveBtn.disabled = !(capturedImage && definitionInput.value.trim() && currentLocation);
+    }
+
+    // Initialize camera on page load
+    startCamera();
+  })();
+</script>
+</body>
+</html>
+

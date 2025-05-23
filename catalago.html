@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catálogo con Filtro</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('img/fondo3.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0;
+      font-size: 2.5em;
+      color: #fff;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .filtrado {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: 0 auto 30px auto;
+      text-align: center;
+      color: white;
+    }
+
+    .filtrado select {
+      padding: 8px;
+      margin: 0 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .catalogo {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto 50px auto;
+    }
+
+    .producto {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #000;
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .producto:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .producto img {
+      width: 100%;
+      max-height:250px; /* Set a maximum height */
+      object-fit: contain; /* Maintain aspect ratio */
+      cursor: pointer;
+      transition: filter 0.4s ease;
+    }
+
+    .producto img:hover {
+      filter: brightness(1.3);
+    }
+
+    .producto h3 {
+      padding: 15px;
+      font-size: 1em;
+      color: #fff;
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modal-img {
+      max-width: 90%;
+      max-height: 90%;
+      border: 5px solid #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Catálogo de Productos</h1>
+
+  <div class="filtrado">
+    <h2>Seleccione</h2>
+    <label for="empresa">Empresa:</label>
+    <select id="empresa">
+      <option value="">-- Todas --</option>
+      <option value="fincaRotondo">Finca Rotondo</option>
+      <option value="montesierpe">Montesierpe</option>
+      <option value="vinVieja">Viña Vieja</option>
+      <option value="piscoVargas">Pisco Vargas</option>
+    </select>
+
+    <label for="tipo">Tipo de Bebida:</label>
+    <select id="tipo">
+      <option value="">-- Todos --</option>
+      <option value="pisco">Pisco</option>
+      <option value="vino">Vino</option>
+      <option value="espumante">Espumante</option>
+      <option value="jarabe">Jarabe</option>
+      <option value="coctel">Coctel</option>
+    </select>
+  </div>
+
+  <div class="catalogo" id="catalogo"></div>
+
+  <div id="modal">
+    <img id="modal-img" src="" alt="Producto ampliado">
+  </div>
+
+  <script>
+    const productos = [
+    { nombre: 'Pisco Finca Rotondo Mosto Verde Italia 750ml', imagen: 'img/mostoverde.png' },
+    { nombre: 'Pisco Finca Rotondo Mosto Verde Quebranta 750ml', imagen: 'img/Mosto Verde Quebranta.png' },
+    { nombre: 'Pisco Finca Rotondo Mosto Verde Moscatel 750ml', imagen: 'img/Mosto Verde Moscatel.png' },
+    { nombre: 'Pisco Finca Rotondo Mosto Verde Torontel 750ml', imagen: 'img/Mosto Verde Torontel.png' },
+    { nombre: 'Vino Finca Rotondo Malbec Reserva 750 Ml', imagen: 'img/Malbec Reserva.png' },
+    { nombre: 'Vino Finca Rotondo Sauvignon Blanc 750 Ml ', imagen: 'img/Sauvignon Blanc.png ' },
+    { nombre: 'Vino Finca Rotondo Malbec – Merlot – Cabernet Sauvignon 750 Ml ', imagen: 'img/vino Finca Rotondo Malbec-Merlot-Carbernet.jpg'},
+    { nombre: 'Pisco Finca Rotondo Quebranta 750ml ', imagen: 'img/Quebranta.png ' },
+    { nombre: 'Pisco Finca Rotondo Acholado 750ml ', imagen: 'img/Acholado.png ' },
+    { nombre: 'Vino Finca Rotondo Malbec 750 Ml ', imagen: 'img/Malbec.png' },
+    { nombre: 'Vino Finca Rotondo Cabernet Sauvignon 750 Ml ', imagen: 'img/Cabernet Sauvignon 750 Ml.png ' },
+    { nombre: 'Pisco Finca Rotondo mosto verde Acholado 750ml – Edición Machupicchu ', imagen: 'img/mosto verde Acholado.png' },
+    { nombre: 'Pisco Finca Rotondo mosto verde Quebranta 750ml – Edicion Machupicchu ', imagen: 'img/mosto verde Quebranta Edicion Machupicchu.png ' },
+    { nombre: 'Pack Chilcano Finca Rotondo ', imagen: 'img/Pack Chilcano Finca Rotondo.png' },
+    { nombre: 'Pisco Finca Rotondo Italia 750ml ', imagen: 'img/Rotondo Italia.png' },
+    { nombre: 'Pisco Finca Rotondo Moscatel 750ml ', imagen: 'img/Pisco Finca Rotondo Moscatel.png ' },
+    { nombre: 'Pisco Finca Rotondo Torontel 750ml ', imagen: 'img/Pisco Finca Rotondo Torontel.png ' },
+    { nombre: 'Pisco Finca Rotondo Quebranta 2 L ', imagen: 'img/Pisco Finca Rotondo Quebranta.png ' },
+    { nombre: 'Four Pack Finca Rotondo X 187ml ', imagen: 'img/Four Pack Finca Rotondo.png ' },
+    { nombre: 'Vino Finca Rotondo Gran Reserva Blend Isabel 750ml ', imagen: 'img/Vino Finca Rotondo Gran Reserva Blend Isabel.png ' },
+    { nombre: 'Vino Montesierpe Gran Borgoña Tinto 750 Ml. ', imagen: 'img/Vino Montesierpe Gran Borgoña Tinto 750 Ml..png ' },
+    { nombre: 'Vino Montesierpe Rosé Semi Seco 750 Ml ', imagen: 'img/Vino Montesierpe Rosé Semi Seco 750 Ml.png ' },
+    { nombre: 'Vino Montesierpe Malbec Semi Seco 750 Ml ', imagen: 'img/Vino Montesierpe Malbec Semi Seco 750 Ml.png ' },
+    { nombre: 'Vino Montesierpe Chenin Semi Seco 750 Ml ', imagen: 'img/Vino Montesierpe Chenin Semi Seco 750 Ml.png ' },
+    { nombre: 'Vino Montesierpe Malbec Merlot 750 Ml ', imagen: 'img/Vino Montesierpe Malbec Merlot 750 Ml.png ' },
+    { nombre: 'Vino Montesierpe Cabernet Sauvignon X 750 Ml ', imagen: 'img/Cabernet Sauvignon 750 Ml.png ' },
+    { nombre: 'Vino Montesierpe Chenin Blanc – Sauvignon x 750 Ml ', imagen: 'img/Vino Montesierpe Chenin Blanc – Sauvignon x 750 Ml.png ' },
+    { nombre: 'Espumante Montesierpe Moscatel Diamante 750 Ml ', imagen: 'img/Espumante Montesierpe Moscatel Diamante 750 Ml.png ' },
+    { nombre: 'Espumante Montesierpe Rosé Ruby 750 Ml ', imagen: 'img/Espumante Montesierpe Rosé Ruby 750 Ml.png ' },
+    { nombre: 'Pisco Montesierpe Acholado 700 Ml ', imagen: 'img/Pisco Montesierpe Acholado 700 Ml.png ' },
+    { nombre: 'Pisco Montesierpe Quebranta 700 Ml', imagen: 'img/Pisco Montesierpe Quebranta 700 Ml.png ' },
+    { nombre: 'Pisco Montesierpe Italia 700 Ml ', imagen: 'img/Pisco Montesierpe Italia 700 Ml.png ' },
+    { nombre: 'Pisco Montesierpe Torontel 700 Ml ', imagen: 'img/Pisco Montesierpe Torontel 700 Ml.png ' },
+    { nombre: 'Pisco Montesierpe Moscatel 700 Ml ', imagen: 'img/Pisco Montesierpe Moscatel 700 Ml.png ' },
+    { nombre: 'Pack Chilcanero Montesierpe 700 Ml ', imagen: 'img/Pack Chilcanero Montesierpe 700 Ml.png' },
+    { nombre: 'Aceite de Oliva extra virgen Finca Rotondo ', imagen: 'img/Aceite de Oliva extra virgen.png ' },
+    { nombre: 'Rosé MalbecFinca Rotondo ', imagen: 'img/Rosé Malbe.png ' },
+    { nombre: 'Espumante Brut Montesierpe ', imagen: 'img/Espumante Brut.png ' },
+    { nombre: 'Cabernet Sauvignon Montesierpe ', imagen: 'img/Cabernet Sauvignon2.png' },
+    { nombre: 'Chilcano de Limón Montesierpe ', imagen: 'img/Chilcano de Limón.png ' },
+    { nombre: 'Chilcano de Maracuyá Montesierpe ', imagen: 'img/Chilcano de Maracuyá.png ' },
+    { nombre: 'Sour de Limón Montesierpe ', imagen: 'img/Sour de Limón.png ' },
+    { nombre: 'Sour de Maracuyá Montesierpe ', imagen: 'img/Sour de Maracuyá.png ' },
+    { nombre: 'Pisco Vargas Acholado Ica - Perú ', imagen: 'img/Pisco Acholado Ica - Perú.png ' },
+    { nombre: 'Pisco Vargas Acholado 750 Ml ', imagen: 'img/Pisco Vargas Acholado 750 Ml.png ' },
+    { nombre: 'Pisco Vargas Quebranta 750 Ml ', imagen: 'img/Pisco Vargas Quebranta 750 Ml.png ' },
+    { nombre: 'Pisco Vargas puro uva Italia ', imagen: 'img/Pisco Vargas puro uva Italia.png ' },
+    { nombre: 'Pisco Vargas puro uva Torontel ', imagen: 'img/Pisco Vargas puro uva Torontel.png ' },
+    { nombre: 'Pisco Vargas puro uva Moscatel ', imagen: 'img/Pisco Vargas puro uva Moscatel.png ' },
+    { nombre: 'Sour Limón Vargas ', imagen: 'img/Sour de Limón.png ' },
+    { nombre: 'Sour Maracuyá Vargas ', imagen: 'img/Sour de Maracuyá.png ' },
+    { nombre: 'Jarabe de Goma Vargas ', imagen: 'img/Jarabe de Goma Vargas.png ' },
+    { nombre: 'Jarabe de Granadina Vargas ', imagen: 'img/Jarabe de Granadina Vargas.png' },
+    { nombre: 'Pack Vargas ', imagen: 'img/Pack Vargas.png ' },
+    { nombre: 'Sour Mix Vargas ', imagen: 'img/Sour Mix Vargas.png'},
+    { nombre: 'Vino Gran Borgoña Lata Viña Vieja ', imagen: 'img/Vino Gran Borgoña Lata Viña Vieja.png ' },
+    { nombre: 'Vino Malbec Lata Viña Vieja ', imagen: 'img/Vino Malbec Lata Viña Vieja.png ' },
+    { nombre: 'Vino Chenin Blanc Lata Viña Vieja ', imagen: 'img/Vino Chenin Blanc Lata Viña Vieja.png ' },
+    { nombre: 'Vino Gran Rose Lata Viña Vieja ', imagen: 'img/Vino Gran Rose Lata Viña Vieja.png ' },
+    { nombre: 'Vino Gran Rose Viña Vieja ', imagen: 'img/Vino Gran Borgoña Viña Vieja.png ' },
+    { nombre: 'Vino Malbec Viña Vieja ', imagen: 'img/Vino Malbec Viña Vieja.png ' },
+    { nombre: 'Vino Chenin Blanc Viña Vieja ', imagen: 'img/Vino Chenin Blanc Viña Vieja.png ' },
+    { nombre: 'Vino Gran Borgoña Viña Vieja ', imagen: 'img/Vino Gran Borgoña Viña Vieja.png' },
+    { nombre: 'Vino Cabernet Sauvignon Viña Vieja ', imagen: 'img/Vino Cabernet Sauvignon Viña Vieja.png ' },
+    { nombre: 'Vino Malbec-Merlot Viña Vieja ', imagen: 'img/Vino Malbec-Merlot Viña Vieja.png ' },
+    { nombre: 'Vino Chenin Blanc 750ml  Viña Vieja ', imagen: 'img/Vino Chenin Blanc 750ml  Viña Vieja.png ' },
+    { nombre: 'Espumante Napoleón Rosso Viña Vieja ', imagen: 'img/Espumante Napoleón Rosso.png ' },
+    { nombre: 'Espumante Napoleón Bianco Viña Vieja ', imagen: 'img/Espumante Napoleón Bianco Viña Vieja.png ' },
+    { nombre: 'Generoso- Viña Vieja ', imagen: 'img/Generoso- Viña Vieja.png ' },
+    { nombre: 'Sour Montesierpe Maracuya 700ml ', imagen: 'img/Sour Montesierpe Maracuya 700ml.png ' },
+    { nombre: 'Sour Montesierpe Limón 700ml ', imagen: 'img/Sour Montesierpe Limón 700ml.png ' },
+    { nombre: 'Sangría Viña Vieja 750ml ', imagen: 'img/Sangría Viña Vieja 750ml.png' },
+    { nombre: 'Sangria Viña Vieja lata 355ml ', imagen: 'img/Sangria Viña Vieja lata 355ml.png ' },
+    { nombre: 'Cocktail Montesierpe Naranja 700ml ', imagen: 'img/Cocktail Montesierpe Naranja 700ml.png ' },
+    { nombre: 'Cocktail Montesierpe Piña Colada ', imagen: 'img/Cocktail Montesierpe Piña Colada.png ' },
+    { nombre: 'Cocktail Montesierpe Manzana ', imagen: 'img/Cocktail Montesierpe Manzana.png ' },
+];
+    function clasificarProductos() {
+      productos.forEach(producto => {
+        const nombre = producto.nombre.toLowerCase();
+
+        // Asignar empresa
+        if (nombre.includes('finca rotondo')) {
+          producto.empresa = 'fincaRotondo';
+        } else if (nombre.includes('montesierpe')) {
+          producto.empresa = 'montesierpe';
+        } else if (nombre.includes('viña vieja')) {
+          producto.empresa = 'vinVieja';
+        } else if (nombre.includes('vargas')) {
+          producto.empresa = 'piscoVargas';
+        } else {
+          producto.empresa = '';
+        }
+
+        // Asignar tipo
+        if (nombre.includes('pisco')) {
+          producto.tipo = 'pisco';
+        } else if (nombre.includes('vino')) {
+          producto.tipo = 'vino';
+        } else if (nombre.includes('espumante')) {
+          producto.tipo = 'espumante';
+        } else if (nombre.includes('jarabe')) {
+          producto.tipo = 'jarabe';
+        } else if (
+          nombre.includes('sour') ||
+          nombre.includes('chilcano') ||
+          nombre.includes('coctel') ||
+          nombre.includes('cocktail')
+        ) {
+          producto.tipo = 'coctel';
+        } else {
+          producto.tipo = '';
+        }
+      });
+    }
+
+    const empresaSelect = document.getElementById('empresa');
+    const tipoSelect = document.getElementById('tipo');
+    const catalogo = document.getElementById('catalogo');
+
+    function mostrarProductosFiltrados() {
+      const empresa = empresaSelect.value;
+      const tipo = tipoSelect.value;
+      catalogo.innerHTML = '';
+
+      const filtrados = productos.filter(producto => {
+        const coincideEmpresa = !empresa || producto.empresa === empresa;
+        const coincideTipo = !tipo || producto.tipo === tipo;
+        return coincideEmpresa && coincideTipo;
+      });
+
+      if (filtrados.length === 0) {
+        catalogo.innerHTML = '<p style="color:white;text-align:center;">No se encontraron productos.</p>';
+        return;
+      }
+
+      filtrados.forEach(producto => {
+        const div = document.createElement('div');
+        div.className = 'producto';
+
+        const img = document.createElement('img');
+        img.src = producto.imagen;
+        img.alt = producto.nombre;
+
+        const h3 = document.createElement('h3');
+        h3.textContent = producto.nombre;
+
+        div.appendChild(img);
+        div.appendChild(h3);
+        catalogo.appendChild(div);
+      });
+
+      activarModalImagen();
+    }
+
+    function activarModalImagen() {
+      const modal = document.getElementById('modal');
+      const modalImg = document.getElementById('modal-img');
+
+      document.querySelectorAll('.producto img').forEach(img => {
+        img.addEventListener('click', () => {
+          modalImg.src = img.src;
+          modal.style.display = 'flex';
+        });
+      });
+
+      modal.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      clasificarProductos();
+      mostrarProductosFiltrados();
+    });
+
+    empresaSelect.addEventListener('change', mostrarProductosFiltrados);
+    tipoSelect.addEventListener('change', mostrarProductosFiltrados);
+  </script>
+
+</body>
+</html>
